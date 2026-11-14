@@ -1,0 +1,47 @@
+
+import express from 'express';
+import protect from '../middleware/authMiddleware.js';
+import restrictTo from '../middleware/roleMiddleware.js';
+const restrictToGovt = restrictTo('government');
+import upload from '../middleware/uploadMiddleware.js';
+import {
+  createIssue,
+  getMyIssues,
+  getAllIssues,
+  getIssueById,
+  updateIssueStatus,
+  deleteIssue,
+  getStats,
+  getPublicStats,
+  getMapIssues,
+  getGovtClusters,
+  getIssueCluster,
+  reclassifyIssue,
+  voteIssue,
+  getAssignableUsers,
+  assignIssue,
+  resolveIssue,
+} from '../controllers/issueController.js';
+
+const router = express.Router();
+
+router.get('/public-stats', getPublicStats);
+router.get('/clusters', protect, restrictToGovt, getGovtClusters);
+router.get('/map', protect, getMapIssues);
+router.get('/stats', protect, restrictToGovt, getStats);
+router.get('/my', protect, getMyIssues);
+router.get('/', protect, restrictToGovt, getAllIssues);
+
+router.post('/', protect, upload.single('image'), createIssue);
+
+router.put('/:id/status', protect, restrictToGovt, updateIssueStatus);
+router.post('/:id/reclassify', protect, restrictToGovt, reclassifyIssue);
+router.post('/:id/vote', protect, voteIssue);
+router.post('/:id/assign', protect, restrictToGovt, assignIssue);
+router.post('/:id/resolve', protect, upload.single('image'), resolveIssue);
+router.get('/users/assignable', protect, restrictToGovt, getAssignableUsers);
+router.get('/:id/cluster', protect, getIssueCluster);
+router.get('/:id', protect, getIssueById);
+router.delete('/:id', protect, restrictToGovt, deleteIssue);
+
+export default router;
